@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-eng-pod
+  namespace: kafka
+spec:
+  containers:
+  - name: demo
+    image: nginx
+    env:
+    - name: KAFKA_BOOTSTRAP_HOST
+      value: kafka-kafka-bootstrap.kafka.svc.cluster.local:9093
+    - name: KAFKA_GROUP_ID
+      value: demo-eng-group
+    - name: KAFKA_TOPIC_DEMO_ENG_TOPIC
+      value: demo-eng-topic
+    - name: KAFKA_USER_CA_CRT
+      value: /etc/kafka-ca/ca.crt
+    - name: KAFKA_USER_CRT
+      value: /etc/kafka-auth/user.crt
+    - name: KAFKA_USER_KEY
+      value: /etc/kafka-auth/user.key
+    imagePullPolicy: IfNotPresent
+    volumeMounts:
+    - mountPath: /etc/kafka-auth
+      name: kafka-auth
+      readOnly: true
+    - mountPath: /etc/kafka-ca
+      name: kafka-ca
+      readOnly: true
+  volumes:
+  - name: kafka-auth
+    secret:
+      defaultMode: 420
+      secretName: demo-eng-user
+  - name: kafka-ca
+    secret:
+      defaultMode: 420
+      secretName: kafka-cluster-ca-cert
