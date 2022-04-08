@@ -1,23 +1,18 @@
 const fs = require('fs')
 const { Kafka } = require("kafkajs")
 
-const topic = "demo-eng-topic"
-
-fs.readFile('/etc/kafka-auth/user.password', function read(err, data) {
-    if (err) {
-        throw err;
-    }
-    const passphrase = data;
-});
+const topic = process.env.KAFKA_TOPIC_DEMO_ENG_TOPIC
+const cacrt = process.env.KAFKA_USER_CA_CRT
+const userkey = process.env.KAFKA_USER_KEY
+const usercrt = process.env.KAFKA_USER_CRT
 
 const kafka = new Kafka({
   clientId: 'demo-eng-producer',
-  brokers: ['kafka-kafka-bootstrap.kafka.svc.cluster.local:9093'],
+  brokers: [process.env.KAFKA_BOOTSTRAP_HOST],
   ssl: {
-    ca: [fs.readFileSync('/etc/kafka-ca/ca.crt', 'utf-8')],
-    key: fs.readFileSync('/etc/kafka-auth/user.key', 'utf-8'),
-    cert: fs.readFileSync('/etc/kafka-auth/user.crt', 'utf-8')
-//    passphrase: passphrase
+    ca: [fs.readFileSync(cacrt, 'utf-8')],
+    key: fs.readFileSync(userkey, 'utf-8'),
+    cert: fs.readFileSync(usercrt, 'utf-8')
   },
 })
 
@@ -48,5 +43,5 @@ const produce = async () => {
 }
 
 produce().catch((err) => {
-	console.error("error in producer: ", err)
+  console.error("error in producer: ", err)
 })
